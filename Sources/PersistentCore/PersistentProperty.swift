@@ -12,3 +12,13 @@ protocol PersistentProperty: AnyObject {
     
     var key: String? { get set }
 }
+
+extension PersistentProperty {
+    var unwrappedKey: String {
+        guard let key = key else {
+            fatalError("`key` property of `\(String(describing: Self.self))` accessed before being set")
+        }
+        
+        return key
+    }
+}
