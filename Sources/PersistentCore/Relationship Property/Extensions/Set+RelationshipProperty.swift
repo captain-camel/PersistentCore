@@ -7,7 +7,7 @@
 
 import CoreData
 
-extension Set: RelationshipProperty where Element: PersistentObject {
+extension Set: RelationshipType where Element: PersistentObject {
     typealias Destination = Element
     
     typealias RawType = NSSet
@@ -16,11 +16,11 @@ extension Set: RelationshipProperty where Element: PersistentObject {
     
     static var ordered: Bool { false }
     
-    init(nativeValue: RawType) {
-        self = Set(nativeValue.map { Destination(object: ($0 as! NSManagedObject)) })
+    init(relationshipPrimitive: RawType) {
+        self = Set(relationshipPrimitive.map { Destination(object: ($0 as! NSManagedObject)) })
     }
     
-    var rawValue: RawType {
+    var relationshipPrimitive: RawType {
         NSSet(array: map { $0.managedObject! })
     }
 }

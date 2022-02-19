@@ -7,7 +7,7 @@
 
 import CoreData
 
-extension Optional: RelationshipProperty where Wrapped: PersistentObject {
+extension Optional: RelationshipType where Wrapped: PersistentObject {
     typealias Destination = Wrapped
 
     typealias RawType = NSManagedObject?
@@ -16,11 +16,11 @@ extension Optional: RelationshipProperty where Wrapped: PersistentObject {
     
     static var ordered: Bool { false }
     
-    init(nativeValue: RawType) {
-        self = nativeValue.map { Destination(object: $0) }
+    init(relationshipPrimitive: RawType) {
+        self = relationshipPrimitive.map { Destination(object: $0) }
     }
     
-    var rawValue: RawType {
+    var relationshipPrimitive: RawType {
         self?.managedObject
     }
 }
