@@ -9,9 +9,9 @@ import CoreData
 
 extension Property {
     @propertyWrapper
-    class Relationship<Property: RelationshipProperty>: PersistentProperty {
+    class Relationship<Property: RelationshipType>: PersistentProperty {
         
-        enum RelationshipKind {
+        enum Kind {
             case toOne
             case toMany
         }
@@ -66,7 +66,7 @@ extension Property {
                 instance.managedObject.willAccessValue(forKey: key)
                 defer { instance.managedObject.didAccessValue(forKey: key) }
                 
-                return Property(nativeValue: (instance.managedObject.value(forKey: key) as! Property.RawType))
+                return Property(relationshipPrimitive: (instance.managedObject.value(forKey: key) as! Property.RawType))
             }
             set {
                 let key = instance[keyPath: storageKeyPath].unwrappedKey
@@ -74,11 +74,11 @@ extension Property {
                 instance.managedObject.willChangeValue(forKey: key)
                 defer { instance.managedObject.didChangeValue(forKey: key) }
                 
-                switch newValue.rawValue {
+                switch newValue.relationshipPrimitive {
                 case nil as NSManagedObject?:
                     instance.managedObject.setNilValueForKey(key)
                 default:
-                    instance.managedObject.setValue(newValue.rawValue, forKey: key)
+                    instance.managedObject.setValue(newValue.relationshipPrimitive, forKey: key)
                 }
                 
                 if instance[keyPath: storageKeyPath].autosave {
