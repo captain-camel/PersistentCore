@@ -8,72 +8,7 @@
 import CoreData
 import Combine
 
-protocol PersistentCreatable: PersistentObject {}
-
-extension PersistentCreatable {
-    static func create(_ initializer: (Self) -> Void, saving: Bool = DataStack.default.autosave) -> Self {
-        let new = Self.init(
-            object: NSManagedObject(
-                entity: Self.entities[String(describing: Self.self)]!,
-                insertInto: DataStack.default.container.viewContext
-            )
-        )
-        
-        let copy = new.silentlyUpdatingCopy()
-        
-        initializer(copy)
-        
-        if saving {
-            DataStack.default.save()
-        }
-        
-        return new
-    }
-}
-
-protocol PersistentEditable: PersistentObject {}
-
-extension PersistentEditable {
-    func edit(updating: Bool = true, saving: Bool = DataStack.default.autosave, _ editor: (Self) -> Void) {
-        let silentCopy = silentlyUpdatingCopy()
-        
-        editor(silentCopy)
-        
-        if updating {
-            silentCopy.updateSilentlyUpdatedProperties()
-        } else {
-            silentCopy.propertiesUpdatedSilently.removeAll()
-        }
-        
-        if saving && updating {
-            DataStack.default.save()
-        }
-    }
-    
-    func set<T>(_ keyPath: ReferenceWritableKeyPath<Self, T>, to value: T, updating: Bool = DataStack.default.autosave, saving: Bool = true) {
-        if !updating {
-            let silentCopy = silentlyUpdatingCopy()
-            
-            silentCopy[keyPath: keyPath] = value
-        } else {
-            self[keyPath: keyPath] = value
-        }
-        
-        if saving && updating {
-            DataStack.default.save()
-        }
-    }
-}
-
-protocol Publishable: PersistentObject {}
-
-extension Publishable {
-    static func publisher() ->EntityPublisher<Self> {
-        return EntityPublisher()
-    }
-}
-
-public class PersistentObject: ObservableObject, PersistentCreatable, PersistentEditable, Publishable {
+public class PersistentObject: ObservableObject {
     var managedObject: NSManagedObject!
     
     func silentlyUpdatingCopy() -> Self {
