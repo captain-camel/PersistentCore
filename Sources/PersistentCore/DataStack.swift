@@ -28,6 +28,8 @@ public class DataStack {
         }
     }
     
+    let autosave = false
+    
     var entities: [PersistentObject.Type] {
         didSet {
             for entity in entities {
@@ -40,7 +42,7 @@ public class DataStack {
     
     let container: NSPersistentContainer
     
-    static var defaultStored: DataStack?
+    private static var defaultStored: DataStack?
     
     static var `default`: DataStack {
         get {
