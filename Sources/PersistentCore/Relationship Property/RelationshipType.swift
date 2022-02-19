@@ -5,7 +5,7 @@
 //  Created by Cameron Delong on 1/27/22.
 //
 
-protocol RelationshipProperty {
+protocol RelationshipType {
     associatedtype Destination: PersistentObject
     
     associatedtype RawType
@@ -14,7 +14,7 @@ protocol RelationshipProperty {
     
     static var ordered: Bool { get }
     
-    init(nativeValue: RawType)
+    init(relationshipPrimitive: RawType)
     
-    var rawValue: RawType { get }
+    var relationshipPrimitive: RawType { get }
 }
