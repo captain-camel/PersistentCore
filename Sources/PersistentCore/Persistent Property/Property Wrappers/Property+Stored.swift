@@ -9,7 +9,7 @@ import CoreData
 
 extension Property {
     @propertyWrapper
-    class Stored<Property: StorableProperty>: PersistentProperty {
+    class Stored<Property: StorableType>: PersistentProperty {
         let autosave: Bool
         
         var key: String?
@@ -40,7 +40,7 @@ extension Property {
                 instance.managedObject.willAccessValue(forKey: key)
                 defer { instance.managedObject.didAccessValue(forKey: key) }
                 
-                return Property(primitive: instance.managedObject.value(forKey: key) as! Property.PrimitiveType)
+                return Property(storablePrimitive: instance.managedObject.value(forKey: key) as! Property.PrimitiveType)
             }
             set {
                 let key = instance[keyPath: storageKeyPath].unwrappedKey
@@ -48,11 +48,11 @@ extension Property {
                 instance.managedObject.willChangeValue(forKey: key)
                 defer { instance.managedObject.didChangeValue(forKey: key) }
                 
-                switch newValue.primitive {
+                switch newValue.storablePrimitive {
                 case nil as Any?:
                     instance.managedObject.setNilValueForKey(key)
                 default:
-                    instance.managedObject.setValue(newValue.primitive, forKey: key)
+                    instance.managedObject.setValue(newValue.storablePrimitive, forKey: key)
                 }
                 
                 if instance[keyPath: storageKeyPath].autosave {
