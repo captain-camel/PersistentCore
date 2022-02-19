@@ -32,11 +32,11 @@ public struct Fetch<Object: PersistentObject> {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
         let predicate: NSPredicate
 
-        switch value.primitive {
+        switch value.storablePrimitive {
         case nil as Any?:
             predicate = NSPredicate(format: "\(key) == nil")
         default:
-            predicate = NSPredicate(format: "\(key) == %@", argumentArray: [value.primitive])
+            predicate = NSPredicate(format: "\(key) == %@", argumentArray: [value.storablePrimitive])
         }
 
         addPredicate(predicate, combinationType: .and)
@@ -46,7 +46,7 @@ public struct Fetch<Object: PersistentObject> {
     func `where`<Property>(_ keyPath: KeyPath<Object, PersistentObject.Relationship<Property>>, equals value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) == %@", argumentArray: [value.rawValue]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) == %@", argumentArray: [value.relationshipPrimitive]), combinationType: .and)
         return self
     }
     
@@ -61,28 +61,28 @@ public struct Fetch<Object: PersistentObject> {
     func `where`<Property>(_ keyPath: KeyPath<Object, PersistentObject.Stored<Property>>, greaterThan value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) > %@", argumentArray: [value.primitive]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) > %@", argumentArray: [value.storablePrimitive]), combinationType: .and)
         return self
     }
     
     func `where`<Property>(_ keyPath: KeyPath<Object, PersistentObject.Stored<Property>>, lessThan value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) < %@", argumentArray: [value.primitive]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) < %@", argumentArray: [value.storablePrimitive]), combinationType: .and)
         return self
     }
     
     func `where`<Property>(_ keyPath: KeyPath<Object, PersistentObject.Stored<Property>>, greaterThanOrEqualTo value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) >= %@", argumentArray: [value.primitive]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) >= %@", argumentArray: [value.storablePrimitive]), combinationType: .and)
         return self
     }
     
     func `where`<Property>(_ keyPath: KeyPath<Object, PersistentObject.Stored<Property>>, lessThanOrEqualTo value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) <= %@", argumentArray: [value.primitive]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) <= %@", argumentArray: [value.storablePrimitive]), combinationType: .and)
         return self
     }
     
@@ -90,11 +90,11 @@ public struct Fetch<Object: PersistentObject> {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
         let predicate: NSPredicate
 
-        switch value.primitive {
+        switch value.storablePrimitive {
         case nil as Any?:
             predicate = NSPredicate(format: "\(key) == nil")
         default:
-            predicate = NSPredicate(format: "\(key) == %@", argumentArray: [value.primitive])
+            predicate = NSPredicate(format: "\(key) == %@", argumentArray: [value.storablePrimitive])
         }
 
         addPredicate(predicate, combinationType: .and)
@@ -104,7 +104,7 @@ public struct Fetch<Object: PersistentObject> {
     func or<Property>(_ keyPath: KeyPath<Object, PersistentObject.Relationship<Property>>, equals value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) == %@", argumentArray: [value.rawValue]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) == %@", argumentArray: [value.relationshipPrimitive]), combinationType: .and)
         return self
     }
     
@@ -118,28 +118,28 @@ public struct Fetch<Object: PersistentObject> {
     func or<Property>(_ keyPath: KeyPath<Object, PersistentObject.Stored<Property>>, greaterThan value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) > %@", argumentArray: [value.primitive]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) > %@", argumentArray: [value.storablePrimitive]), combinationType: .and)
         return self
     }
     
     func or<Property>(_ keyPath: KeyPath<Object, PersistentObject.Stored<Property>>, lessThan value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) < %@", argumentArray: [value.primitive]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) < %@", argumentArray: [value.storablePrimitive]), combinationType: .and)
         return self
     }
     
     func or<Property>(_ keyPath: KeyPath<Object, PersistentObject.Stored<Property>>, greaterThanOrEqualTo value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) >= %@", argumentArray: [value.primitive]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) >= %@", argumentArray: [value.storablePrimitive]), combinationType: .and)
         return self
     }
     
     func or<Property>(_ keyPath: KeyPath<Object, PersistentObject.Stored<Property>>, lessThanOrEqualTo value: Property) -> Fetch {
         let key = Object.meta[keyPath: keyPath].unwrappedKey
 
-        addPredicate(NSPredicate(format: "\(key) <= %@", argumentArray: [value.primitive]), combinationType: .and)
+        addPredicate(NSPredicate(format: "\(key) <= %@", argumentArray: [value.storablePrimitive]), combinationType: .and)
         return self
     }
     
