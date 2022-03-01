@@ -1,6 +1,6 @@
 //
 //  DataStack.swift
-//  
+//
 //
 //  Created by Cameron Delong on 1/26/22.
 //
@@ -8,16 +8,29 @@
 import CoreData
 
 public class DataStack {
-    init(entities: [PersistentObject.Type]) {
+    public init(entities: [PersistentObject.Type]) {
         self.entities = entities
         
         let model = NSManagedObjectModel()
         
-        for entity in entities {
-            entity.prepareEntityDescription()
-        }
+        var entityDictionary: [String: NSEntityDescription] = [:]
+        var allComplete: Bool
+        var iteration = 0
         
-        model.entities = entities.map { $0.createEntityDescription() }
+        repeat {
+            allComplete = true
+            
+            for entity in entities {
+                let (description, complete) = entity.entityDescription(entityDictionary[String(describing: entity)], iteration: iteration)
+                entityDictionary[String(describing: entity)] = description
+                
+                if !complete { allComplete = false }
+            }
+            
+            iteration += 1
+        } while !allComplete
+        
+        model.entities = Array(entityDictionary.values)
         
         container = NSPersistentContainer(name: "Model", managedObjectModel: model)
         
@@ -30,23 +43,19 @@ public class DataStack {
     
     let autosave = false
     
-    var entities: [PersistentObject.Type] {
-        didSet {
-            for entity in entities {
-                entity.prepareEntityDescription()
-            }
-            
-            container.managedObjectModel.entities = entities.map { $0.createEntityDescription() }
-        }
-    }
+    let entities: [PersistentObject.Type]
     
     let container: NSPersistentContainer
     
     private static var defaultStored: DataStack?
     
-    static var `default`: DataStack {
+    public static var `default`: DataStack {
         get {
-            defaultStored!
+            guard let defaultStored = defaultStored else {
+                fatalError()
+            }
+            
+            return defaultStored
         }
         set {
             defaultStored = newValue
@@ -55,5 +64,9 @@ public class DataStack {
     
     public func save() {
         try! container.viewContext.save()
+    }
+    
+    public func fetch<Object: PersistentObject>(_ fetch: Fetch<Object>) -> [Object] {
+        try! container.viewContext.fetch(fetch.fetchRequest).map { Object(object: $0, dataStack: self) }
     }
 }
