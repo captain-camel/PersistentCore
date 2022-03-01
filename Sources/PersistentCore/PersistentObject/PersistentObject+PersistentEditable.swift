@@ -1,6 +1,6 @@
 //
 //  PersistentObject+PersistentEditable.swift
-//  
+//
 //
 //  Created by Cameron Delong on 2/18/22.
 //
@@ -8,7 +8,7 @@
 protocol PersistentEditable: PersistentObject {}
 
 extension PersistentEditable {
-    func edit(updating: Bool = true, saving: Bool = DataStack.default.autosave, _ editor: (Self) -> Void) {
+    public func edit(updating: Bool = true, saving: Bool? = nil, _ editor: (Self) -> Void) {
         let silentCopy = silentlyUpdatingCopy()
         
         editor(silentCopy)
@@ -16,15 +16,15 @@ extension PersistentEditable {
         if updating {
             silentCopy.updateSilentlyUpdatedProperties()
         } else {
-            silentCopy.propertiesUpdatedSilently.removeAll()
+            silentCopy.resetPropertiesUpdatingSilently()
         }
         
-        if saving && updating {
-            DataStack.default.save()
+        if (saving ?? dataStack.autosave) && updating {
+            try! managedObject.managedObjectContext!.save()
         }
     }
     
-    func set<T>(_ keyPath: ReferenceWritableKeyPath<Self, T>, to value: T, updating: Bool = DataStack.default.autosave, saving: Bool = true) {
+    public func set<T>(_ keyPath: ReferenceWritableKeyPath<Self, T>, to value: T, updating: Bool = true, saving: Bool? = nil) {
         if !updating {
             let silentCopy = silentlyUpdatingCopy()
             
@@ -33,8 +33,8 @@ extension PersistentEditable {
             self[keyPath: keyPath] = value
         }
         
-        if saving && updating {
-            DataStack.default.save()
+        if (saving ?? dataStack.autosave) && updating {
+            try! managedObject.managedObjectContext!.save()
         }
     }
 }

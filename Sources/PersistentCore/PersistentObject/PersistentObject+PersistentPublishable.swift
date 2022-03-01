@@ -1,6 +1,6 @@
 //
 //  PersistentObject+PersistentPublishable.swift
-//  
+//
 //
 //  Created by Cameron Delong on 2/18/22.
 //
@@ -8,8 +8,8 @@
 protocol PersistentPublishable: PersistentObject {}
 
 extension PersistentPublishable {
-    static func publisher() ->EntityPublisher<Self> {
-        return EntityPublisher()
+    public static func publisher(callback: @escaping EntityPublisher<Self>.Callback) -> EntityPublisher<Self> {
+        return EntityPublisher(callback: callback)
     }
 }
 
