@@ -1,6 +1,6 @@
 //
 //  Property+Stored.swift
-//  
+//
 //
 //  Created by Cameron Delong on 1/26/22.
 //
@@ -9,27 +9,27 @@ import CoreData
 
 extension Property {
     @propertyWrapper
-    class Stored<Property: StorableType>: PersistentProperty {
-        let autosave: Bool
-        
+    public class Stored<Property: StorableType>: PersistentProperty {
         var key: String?
         
-        init(autosave: Bool = true) {
+        public var projectedValue: Stored { self }
+        
+        public var autosave: Bool?
+        
+        public init(autosave: Bool? = nil) {
             self.autosave = autosave
         }
         
-        var projectedValue: Stored { self }
-        
-        var propertyDescription: NSPropertyDescription {
+        func propertyDescription(_ description: NSPropertyDescription?, iteration: Int) -> (description: NSPropertyDescription, complete: Bool) {
             let attributeDescription = NSAttributeDescription()
             attributeDescription.name = unwrappedKey
             attributeDescription.attributeType = Property.PrimitiveType.attributeType
             attributeDescription.isOptional = true
             
-            return attributeDescription
+            return (description: attributeDescription, complete: true)
         }
         
-        static subscript(
+        public static subscript(
             _enclosingInstance instance: Enclosing,
             wrapped wrappedKeyPath: ReferenceWritableKeyPath<Enclosing, Property>,
             storage storageKeyPath: ReferenceWritableKeyPath<Enclosing, Stored>
@@ -37,32 +37,21 @@ extension Property {
             get {
                 let key = instance[keyPath: storageKeyPath].unwrappedKey
                 
-                instance.managedObject.willAccessValue(forKey: key)
-                defer { instance.managedObject.didAccessValue(forKey: key) }
-                
-                return Property(storablePrimitive: instance.managedObject.value(forKey: key) as! Property.PrimitiveType)
+                return Property(storablePrimitive: instance.getValue(forKey: key))
             }
             set {
                 let key = instance[keyPath: storageKeyPath].unwrappedKey
                 
-                instance.managedObject.willChangeValue(forKey: key)
-                defer { instance.managedObject.didChangeValue(forKey: key) }
+                instance.setValue(newValue.storablePrimitive, forKey: key)
                 
-                switch newValue.storablePrimitive {
-                case nil as Any?:
-                    instance.managedObject.setNilValueForKey(key)
-                default:
-                    instance.managedObject.setValue(newValue.storablePrimitive, forKey: key)
-                }
-                
-                if instance[keyPath: storageKeyPath].autosave {
-                    try! instance.managedObject.managedObjectContext!.save()
+                if instance[keyPath: storageKeyPath].autosave ?? instance.dataStack.autosave {
+                    instance.dataStack.save()
                 }
             }
         }
         
-        @available(*, unavailable, message: "@Stored can only be applied to properties of PersistentObject subclasses")
-        var wrappedValue: Property {
+        @available(*, unavailable, message: "'@Stored' can only be applied to properties of subclasses of 'PersistentObject'")
+        public var wrappedValue: Property {
             get { fatalError() }
             set { fatalError() }
         }
