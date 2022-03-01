@@ -63,7 +63,7 @@ open class PersistentObject: ObservableObject {
         }
     }
     
-    required init(object: NSManagedObject?, dataStack: DataStack) {
+    public required init(object: NSManagedObject?, dataStack: DataStack) {
         self.managedObject = object
         self.dataStack = dataStack
         
