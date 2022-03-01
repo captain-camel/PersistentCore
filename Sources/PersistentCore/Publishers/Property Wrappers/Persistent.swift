@@ -1,6 +1,6 @@
 //
 //  Persistent.swift
-//  
+//
 //
 //  Created by Cameron Delong on 2/18/22.
 //
@@ -16,7 +16,7 @@ public struct Persistent<T: PersistentObject>: DynamicProperty {
     /// A proxy value responsible for actually storing the values.
     @ObservedObject private var proxy: Proxy
 
-    let publisher: EntityPublisher<T>
+    private var publisher: EntityPublisher<T>!
 
     /// Creates an instance of ``Persistent`` based on a ``Fetch`` clause.
     ///
@@ -27,21 +27,19 @@ public struct Persistent<T: PersistentObject>: DynamicProperty {
     ///     - term `onSave`: Updates when the ``DataStack`` that the objects are fetched from is saved using ``DataStack/save()``.
     ///   - dataStack: The ``DataStack`` to fetch objects from. Uses ``DataStack/default`` by default.
     ///
-    init(_ fetch: Fetch<T>, dataStack: DataStack = .default) {
-        publisher = EntityPublisher(fetch)
-
+    public init(_ fetch: Fetch<T>, dataStack: DataStack = .default) {
         proxy = .init()
-
-        publisher.subscribe { [self] objects in
+        
+        publisher = EntityPublisher(fetch: fetch, dataStack: dataStack) { [proxy] objects in
             proxy.objects = objects
         }
-
-        self.fetch()
+        
+        update()
     }
 
     /// Manually updates objects with values fetched from the data stack.
-    func fetch() {
-        publisher.fetch()
+    public func update() {
+        publisher.update()
     }
 }
 
