@@ -1,6 +1,6 @@
 //
 //  PersistentObject.swift
-//  
+//
 //
 //  Created by Cameron Delong on 1/26/22.
 //
@@ -10,32 +10,23 @@ import Combine
 
 public class PersistentObject: ObservableObject {
     var managedObject: NSManagedObject!
+    public let dataStack: DataStack
     
     func silentlyUpdatingCopy() -> Self {
-        let copy = Self(object: managedObject)
+        let copy = Self(object: managedObject, dataStack: dataStack)
         copy.silent = true
         
         return copy
     }
     
-    enum UpdatePolicy: ExpressibleByBooleanLiteral {
-        case silent
-        case withoutSaving
-        case `true`
-
-        init(booleanLiteral value: Bool) {
-            if value {
-                self = .true
-            } else {
-                self = .silent
-            }
-        }
-    }
-    
     private var silent = false
     
-    var propertiesUpdatedSilently: [String] = []
+    private var propertiesUpdatedSilently: [String] = []
     
+    func resetPropertiesUpdatingSilently() {
+        propertiesUpdatedSilently.removeAll()
+    }
+    //keep list only dont set
     func updateSilentlyUpdatedProperties() {
         for key in propertiesUpdatedSilently {
             managedObject.didChangeValue(forKey: key)
@@ -66,14 +57,15 @@ public class PersistentObject: ObservableObject {
         
         if !silent {
             managedObject.didChangeValue(forKey: key)
-            DataStack.default.save()
+            try! managedObject.managedObjectContext!.save()
         } else {
             propertiesUpdatedSilently.append(key)
         }
     }
     
-    internal required init(object: NSManagedObject?) {
+    required init(object: NSManagedObject?, dataStack: DataStack) {
         self.managedObject = object
+        self.dataStack = dataStack
         
         republisher = managedObject.objectWillChange.sink {
             self.objectWillChange.send()
@@ -84,21 +76,22 @@ public class PersistentObject: ObservableObject {
     
     private var republisher: AnyCancellable? = nil
     
-    static func create() -> Self {
-        self.init()
-    }
+//    static func create() -> Self {
+//        self.init()
+//    }
     
-    required convenience init(dataStack: DataStack = .default) {
+    public convenience init(dataStack: DataStack = .default) {
         self.init(
             object: NSManagedObject(
                 entity: Self.entities[String(describing: Self.self)]!,
-                insertInto: DataStack.default.container.viewContext
-            )
+                insertInto: dataStack.container.viewContext
+            ),
+            dataStack: dataStack
         )
     }
     
     static var meta: Self {
-        self.init(object: nil)
+        self.init(object: nil, dataStack: .default)
     }
     
     // TODO: Fix inits
@@ -114,32 +107,51 @@ public class PersistentObject: ObservableObject {
     
     static var entities: [String: NSEntityDescription] = [:]
     
-    class func prepareEntityDescription() {
+    class func entityDescription(_ description: NSEntityDescription?, iteration: Int) -> (description: NSEntityDescription, complete: Bool) {
         let key = String(describing: self)
         
-        let entityDescription = NSEntityDescription()
-        
-        entityDescription.name = key
-        entityDescription.managedObjectClassName = String(describing: NSManagedObject.self)
-        
-        entities[key] = entityDescription
-    }
-    
-    class func createEntityDescription() -> NSEntityDescription {
-        let key = String(describing: self)
-        
-        guard let entityDescription = entities[key] else {
-            fatalError("Failed to find entity description for `\(key)`. This likely means that `prepareEntityDescription()` wasn't called before `createEntityDescription()`.")
-        }
-        
-        entityDescription.properties = Mirror(reflecting: meta).children.compactMap { child in
-            if let property = child.value as? PersistentProperty {
-                return property.propertyDescription
+        switch iteration {
+        case 0:
+            let entityDescription = NSEntityDescription()
+            
+            entityDescription.name = key
+            entityDescription.managedObjectClassName = String(describing: NSManagedObject.self)
+            
+            entities[key] = entityDescription
+            
+            return (description: entityDescription, complete: false)
+            
+        case 1...:
+            var complete = true
+            
+            let mirror = Mirror(reflecting: meta)
+            
+            if iteration == 1 {
+                description!.properties = mirror.children.map(\.value).compactMap { $0 as? PersistentProperty}.map { property in
+                    let (description, propertyComplete) = property.propertyDescription(nil, iteration: 0)
+                    
+                    if !propertyComplete { complete = false }
+                    
+                    return description
+                }
+            } else {
+                description!.properties = description!.properties.map { propertyDescription in
+                    let (description, propertyComplete) = mirror.children.map(\.value).compactMap { $0 as? PersistentProperty }.first { $0.unwrappedKey == propertyDescription.name }!.propertyDescription(propertyDescription, iteration: iteration - 1)
+                    
+                    if !propertyComplete { complete = false}
+                    
+                    return description
+                }
+            }
+            
+            return (description: description!, complete: complete)
+            
+        default:
+            guard let description = description else {
+                fatalError("\(String(describing: Self.self)).\(#function) reached default case before returning non-nil entity description.")
             }
 
-            return nil
+            return (description: description, complete: true)
         }
-        
-        return entityDescription
     }
 }
