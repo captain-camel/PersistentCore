@@ -1,11 +1,11 @@
 //
 //  RelationshipProperty.swift
-//  
+//
 //
 //  Created by Cameron Delong on 1/27/22.
 //
 
-protocol RelationshipType {
+public protocol RelationshipType {
     associatedtype Destination: PersistentObject
     
     associatedtype RawType
@@ -14,7 +14,7 @@ protocol RelationshipType {
     
     static var ordered: Bool { get }
     
-    init(relationshipPrimitive: RawType)
+    init(relationshipPrimitive: RawType, dataStack: DataStack)
     
     var relationshipPrimitive: RawType { get }
 }

@@ -1,14 +1,14 @@
 //
-//  Optional+StorableProperty.swift
-//  
+//  Optional+StorableType.swift
+//
 //
 //  Created by Cameron Delong on 2/18/22.
 //
 
 extension Optional: StorableType where Wrapped: StorableType {
-    typealias PrimitiveType = Wrapped.PrimitiveType?
+    public typealias PrimitiveType = Wrapped.PrimitiveType?
     
-    init(storablePrimitive: PrimitiveType) {
+    public init(storablePrimitive: PrimitiveType) {
         if let primitive = storablePrimitive {
             self = Wrapped(storablePrimitive: primitive)
         } else {
@@ -16,7 +16,7 @@ extension Optional: StorableType where Wrapped: StorableType {
         }
     }
     
-    var storablePrimitive: PrimitiveType {
+    public var storablePrimitive: PrimitiveType {
         self?.storablePrimitive
     }
 }

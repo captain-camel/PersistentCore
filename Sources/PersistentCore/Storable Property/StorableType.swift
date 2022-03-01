@@ -1,11 +1,11 @@
 //
 //  StorableProperty.swift
-//  
+//
 //
 //  Created by Cameron Delong on 1/27/22.
 //
 
-protocol StorableType {
+public protocol StorableType {
     associatedtype PrimitiveType: PersistentPrimitive
     
     init(storablePrimitive: PrimitiveType)
