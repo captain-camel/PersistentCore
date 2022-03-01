@@ -8,7 +8,7 @@
 import CoreData
 import Combine
 
-public class PersistentObject: ObservableObject {
+open class PersistentObject: ObservableObject {
     var managedObject: NSManagedObject!
     public let dataStack: DataStack
     
