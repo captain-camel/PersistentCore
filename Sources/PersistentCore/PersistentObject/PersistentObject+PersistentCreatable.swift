@@ -7,7 +7,7 @@
 
 import CoreData
 
-protocol PersistentCreatable: PersistentObject {}
+public protocol PersistentCreatable: PersistentObject {}
 
 extension PersistentCreatable {
     // TODO: Rename dataStack to into
