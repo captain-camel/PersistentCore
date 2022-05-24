@@ -90,26 +90,6 @@ open class PersistentObject: ObservableObject {
         )
     }
     
-    public static func create(_ initializer: (Self) -> Void, into dataStack: DataStack = .default, saving: Bool? = nil) -> Self {
-        let new = Self.init(
-            object: NSManagedObject(
-                entity: Self.entities[String(describing: Self.self)]!,
-                insertInto: dataStack.container.viewContext
-            ),
-            dataStack: dataStack
-        )
-        
-        let copy = new.silentlyUpdatingCopy()
-        
-        initializer(copy)
-        
-        if saving ?? dataStack.autosave {
-            dataStack.save()
-        }
-        
-        return new
-    }
-    
     static var meta: Self {
         self.init(object: nil, dataStack: .default)
     }
