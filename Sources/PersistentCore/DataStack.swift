@@ -41,7 +41,7 @@ public class DataStack {
         }
     }
     
-    let autosave = false
+    let autosave = true
     
     let entities: [PersistentObject.Type]
     
