@@ -41,7 +41,7 @@ open class PersistentObject: ObservableObject {
         }
         
         print("GETTING VALUE FOR KEY: \(key)")
-        let value = managedObject.value(forKey: key)
+        let value = managedObject.value(forKey: key)!
         print("TYPE IS: \(type(of: value))")
         return value as! T
         
