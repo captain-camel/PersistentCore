@@ -10,7 +10,7 @@ import Combine
 
 open class PersistentObject: ObservableObject {
     var managedObject: NSManagedObject!
-    public let dataStack: DataStack
+    public let dataStack: DataStack!
     
     func silentlyUpdatingCopy() -> Self {
         let copy = Self(object: managedObject, dataStack: dataStack)
@@ -63,7 +63,8 @@ open class PersistentObject: ObservableObject {
         }
     }
     
-    public required init(object: NSManagedObject?, dataStack: DataStack) {
+    // TODO: Optional object init shouldn't be public. Should this init be public at all?
+    public required init(object: NSManagedObject?, dataStack: DataStack?) {
         self.managedObject = object
         self.dataStack = dataStack
         
@@ -91,7 +92,7 @@ open class PersistentObject: ObservableObject {
     }
     
     static var meta: Self {
-        self.init(object: nil, dataStack: .default)
+        self.init(object: nil, dataStack: nil)
     }
     
     // TODO: Fix inits
@@ -127,7 +128,7 @@ open class PersistentObject: ObservableObject {
             let mirror = Mirror(reflecting: meta)
             
             if iteration == 1 {
-                description!.properties = mirror.children.map(\.value).compactMap { $0 as? PersistentProperty}.map { property in
+                description!.properties = mirror.children.map(\.value).compactMap { $0 as? PersistentProperty }.map { property in
                     let (description, propertyComplete) = property.propertyDescription(nil, iteration: 0)
                     
                     if !propertyComplete { complete = false }
@@ -138,7 +139,7 @@ open class PersistentObject: ObservableObject {
                 description!.properties = description!.properties.map { propertyDescription in
                     let (description, propertyComplete) = mirror.children.map(\.value).compactMap { $0 as? PersistentProperty }.first { $0.unwrappedKey == propertyDescription.name }!.propertyDescription(propertyDescription, iteration: iteration - 1)
                     
-                    if !propertyComplete { complete = false}
+                    if !propertyComplete { complete = false }
                     
                     return description
                 }
