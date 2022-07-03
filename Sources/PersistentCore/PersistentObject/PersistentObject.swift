@@ -68,14 +68,14 @@ open class PersistentObject: ObservableObject {
         self.managedObject = object
         self.dataStack = dataStack
         
-        republisher = managedObject.objectWillChange.sink {
-            self.objectWillChange.send()
-        }
+//        republisher = managedObject.objectWillChange.sink {
+//            self.objectWillChange.send()
+//        }
         
         setKeys()
     }
     
-    private var republisher: AnyCancellable? = nil
+//    private var republisher: AnyCancellable? = nil
     
 //    static func create() -> Self {
 //        self.init()
