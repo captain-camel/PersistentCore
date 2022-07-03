@@ -38,9 +38,10 @@ public struct Persistent<T: PersistentObject>: DynamicProperty {
     }
 
     /// Manually updates objects with values fetched from the data stack.
-    public func update() {
-        publisher.update()
-    }
+    // TODO: Name conflicts with DynamicProperty.update()?
+//    public func update() {
+//        publisher.update()
+//    }
 }
 
 extension Persistent {
