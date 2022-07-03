@@ -40,7 +40,13 @@ open class PersistentObject: ObservableObject {
             managedObject.didAccessValue(forKey: key)
         }
         
-        return managedObject.value(forKey: key) as! T
+        print("GETTING VALUE FOR KEY: \(key)")
+        let value = managedObject.value(forKey: key)
+        print("TYPE IS: \(type(of: value))")
+        return value as! T
+        
+        
+//        return managedObject.value(forKey: key) as! T
     }
     
     func setValue<T: PersistentPrimitive>(_ value: T, forKey key: String) {
