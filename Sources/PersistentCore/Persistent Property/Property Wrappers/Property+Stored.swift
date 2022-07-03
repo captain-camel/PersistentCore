@@ -42,7 +42,11 @@ extension Property {
             set {
                 let key = instance[keyPath: storageKeyPath].unwrappedKey
                 
+                print("SETTING VALUE FOR KEY: \(key)")
+                
                 instance.setValue(newValue.storablePrimitive, forKey: key)
+                
+                print("SET VALUE FOR KEY: \(key)")
                 
                 if instance[keyPath: storageKeyPath].autosave ?? instance.dataStack.autosave {
                     instance.dataStack.save()
